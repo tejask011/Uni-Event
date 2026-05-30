@@ -6,22 +6,21 @@ on:
   pull_request:
     branches: [main]
 
-permissions:
-  contents: write
-  pull-requests: write
-
 jobs:
   # ── Update Dependencies via PR ────────────────────────────────────
   update-dependencies:
     name: Update Dependencies
     runs-on: ubuntu-latest
     if: github.event_name == 'push'
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901ebb512078596e6fc4b050511d3e5ab4
 
       - name: Set up Node.js 20
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@60edb3dd545a775cdb01d3efedbac2d7e5d13b8e
         with:
           node-version: 20
 
@@ -34,7 +33,7 @@ jobs:
         run: npm ci
 
       - name: Create Pull Request for dependency updates
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@70a41aba183996c44cedce9e0aded0624ffb39f7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "chore: update package-lock.json [skip ci]"
@@ -50,15 +49,18 @@ jobs:
   lint-and-test:
     name: Lint & Test (app)
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     defaults:
       run:
         working-directory: ./app
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901ebb512078596e6fc4b050511d3e5ab4
 
       - name: Set up Node.js 20
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@60edb3dd545a775cdb01d3efedbac2d7e5d13b8e
         with:
           node-version: 20
           cache: npm
@@ -72,7 +74,7 @@ jobs:
 
       - name: Create PR for formatted files
         if: github.event_name == 'push'
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@70a41aba183996c44cedce9e0aded0624ffb39f7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "style: auto-format with prettier"
