@@ -11,6 +11,41 @@ permissions:
   pull-requests: write
 
 jobs:
+  # ── Update Dependencies via PR ────────────────────────────────────
+  update-dependencies:
+    name: Update Dependencies
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Update app dependencies
+        working-directory: ./app
+        run: npm ci
+
+      - name: Update cloud-functions dependencies
+        working-directory: ./cloud-functions
+        run: npm ci
+
+      - name: Create Pull Request for dependency updates
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: update package-lock.json [skip ci]"
+          branch: chore/update-dependencies
+          title: "chore: update package-lock.json files"
+          body: |
+            Automated dependency updates for both app and cloud-functions.
+            This PR was created automatically by the CI workflow.
+          delete-branch: true
+          labels: dependencies, automated
+
   # ── App: Lint + Test ─────────────────────────────────────────────
   lint-and-test:
     name: Lint & Test (app)
